@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# 00 09 * * * .../update-git [--branch name] [--remote name] [dir]
+
+TAG="update-git"
+
+branch="main"
+remote="origin"
+dir=$(dirname $0)
+
+while [[ $# -ne 0 ]]; do
+  case "$1" in
+    --branch)
+      branch="$2"
+      shift 2
+      ;;
+    --remote)
+      remote="$2"
+      shift 2
+      ;;
+    *)
+      dir="$1"
+      shift
+      ;;
+  esac
+done
+
+if ! cd "$dir"; then
+  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"Unable to cd to '$dir'\"}"
+  exit 1
+fi
+
+if out=$( (git fetch "$remote" && git checkout "$branch" && git reset --hard "$remote/$branch") 2>&1 ); then
+  logger -p user.info -t "$TAG" "{\"status\":\"success\",\"dir\":\"$dir\",\"sha\":\"$(git rev-parse --short HEAD)\"}"
+else
+  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$out\"}"
+fi
