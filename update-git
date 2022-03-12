@@ -30,8 +30,19 @@ if ! cd "$dir"; then
   exit 1
 fi
 
-if out=$( (git fetch "$remote" && git checkout "$branch" && git reset --hard "$remote/$branch") 2>&1 ); then
+if ! out=$( (git fetch "$remote") 2>&1 ); then
+  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$out\"}"
+  exit 1
+fi
+
+if ! out=$( (git verify-commit "$remote/$branch") 2>&1 ); then
+  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$remote/$branch does not have a valid signature\"}"
+  exit 1
+fi
+
+if out=$( (git checkout "$branch" && git reset --hard "$remote/$branch") 2>&1 ); then
   logger -p user.info -t "$TAG" "{\"status\":\"success\",\"dir\":\"$dir\",\"sha\":\"$(git rev-parse --short HEAD)\"}"
 else
   logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$out\"}"
+  exit 1
 fi
