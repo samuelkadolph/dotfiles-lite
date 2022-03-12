@@ -36,7 +36,7 @@ if ! out=$( (git fetch "$remote") 2>&1 ); then
 fi
 
 if ! out=$( (git verify-commit "$remote/$branch") 2>&1 ); then
-  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$remote/$branch does not have a valid signature\"}"
+  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"sha\":\"$(git rev-parse --short $remote/$branch)\",\"error\":\"$remote/$branch does not have a valid signature\"}"
   exit 1
 fi
 
