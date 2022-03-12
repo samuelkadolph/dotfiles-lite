@@ -14,6 +14,10 @@ setopt RM_STAR_SILENT
 
 umask 022
 
+# Integrations
 test -e "$HOME/.zshextra" && source "$HOME/.zshextra"
 
-true
+# Functions
+reload-nginx() {
+  docker exec nginx nginx -c /config/nginx/nginx.conf -s reload
+}
