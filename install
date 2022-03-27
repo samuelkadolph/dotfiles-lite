@@ -9,9 +9,10 @@ ln -fs "$root/zshrc" "$HOME/.zshrc"
 mkdir -p "$HOME/.ssh"
 ln -fs "$root/authorized_keys" "$HOME/.ssh/authorized_keys"
 
-cron=$(crontab -l 2>/dev/null)
-cron=$(echo "$cron" | sed "/$TAG/d")
-[[ -a "$cron" ]] && cron+="\n"
-cron+="00 09 * * * DISABLE_AUTO_UPDATE=true zsh -c 'source $HOME/.oh-my-zsh/oh-my-zsh.sh && omz update' &>/dev/null $TAG"
-cron+="\n05 09 * * * '$root/update-git' $TAG"
+cron=$(crontab -l 2>/dev/null | sed "/$TAG/d")
+
+[[ -n "$cron" ]] && cron+="\n"
+cron+="00 09 * * * DISABLE_AUTO_UPDATE=true zsh -c 'source $HOME/.oh-my-zsh/oh-my-zsh.sh && omz update' &>/dev/null $TAG\n"
+cron+="05 09 * * * '$root/update-git' $TAG"
+
 echo -e "$cron" | crontab -
