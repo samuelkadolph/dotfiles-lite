@@ -6,6 +6,10 @@ root=$([ -L "$0" ] && cd $(dirname $(readlink "$0")) || cd $(dirname "$0") &>/de
 
 ln -fs "$root/zshrc" "$HOME/.zshrc"
 
+if [[ ! -e "$HOME/.oh-my-zsh" ]]; then
+  KEEP_ZSHRC=yes RUNZSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
 mkdir -p "$HOME/.ssh"
 ln -fs "$root/authorized_keys" "$HOME/.ssh/authorized_keys"
 
