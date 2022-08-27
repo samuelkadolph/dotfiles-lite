@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/bin/sh
 
-# 00 09 * * * .../update-git [--branch name] [--remote name] [dir]
+# 00 05 * * * root /a/linux-scripts/update-git [--branch name] [--remote name] [dir]
 
 TAG="update-git"
 
 branch="main"
 remote="origin"
-dir=$(dirname $0)
+dir=$(dirname "$0")
 
-while [[ $# -ne 0 ]]; do
+while [ $# -ne 0 ]; do
   case "$1" in
     --branch)
       branch="$2"
