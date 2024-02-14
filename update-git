@@ -45,4 +45,5 @@ if ! out=$( (git checkout "$branch" && git reset --hard "$remote/$branch") 2>&1 
   exit 1
 else
   printf '{"status":"success","dir":"%s","sha":"%s"}' "$dir" "$(git rev-parse --short HEAD)" | logger -p user.info -t "$TAG"
+  exit 0
 fi
