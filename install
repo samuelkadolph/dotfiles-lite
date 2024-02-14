@@ -1,22 +1,22 @@
-#!/bin/bash
+#!/bin/sh
 
-TAG="###dotfiles-lite###"
+TAG="dotfiles-lite"
 
-root=$([ -L "$0" ] && cd $(dirname $(readlink "$0")) || cd $(dirname "$0") &>/dev/null; pwd -P)
+root=$(cd $(dirname "$0") 1>/dev/null 2>&1; pwd -P)
 
-ln -fs "$root/zshrc" "$HOME/.zshrc"
-
-if [[ ! -e "$HOME/.oh-my-zsh" ]]; then
+if [ ! -e "$HOME/.oh-my-zsh" ]; then
   KEEP_ZSHRC=yes RUNZSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
+
+ln -fs "$root/zshrc" "$HOME/.zshrc"
+touch "$HOME/.zshenv"
+touch "$HOME/.zshextra"
 
 mkdir -p "$HOME/.ssh"
 ln -fs "$root/authorized_keys" "$HOME/.ssh/authorized_keys"
 
-cron=$(crontab -l 2>/dev/null | sed "/$TAG/d")
-
-[[ -n "$cron" ]] && cron+="\n"
-cron+="00 09 * * * DISABLE_AUTO_UPDATE=true zsh -c 'source $HOME/.oh-my-zsh/oh-my-zsh.sh && omz update' &>/dev/null $TAG\n"
-cron+="05 09 * * * '$root/update-git' $TAG"
-
-echo -e "$cron" | crontab -
+cron=$(crontab -l 2>/dev/null | sed "/###$TAG/d")
+[ -n "$cron" ] && cron="${cron}\n"
+cron="${cron}00 09 * * * DISABLE_AUTO_UPDATE=true zsh -c 'source $HOME/.oh-my-zsh/oh-my-zsh.sh && omz update' &>/dev/null ###$TAG\n"
+cron="${cron}05 09 * * * '$root/update-git' ###$TAG"
+echo "$cron" | crontab -

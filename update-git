@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# 00 05 * * * root /a/linux-scripts/update-git [--branch name] [--remote name] [dir]
+# update-git [--branch name] [--remote name] [dir]
 
 TAG="update-git"
 
@@ -26,23 +26,23 @@ while [ $# -ne 0 ]; do
 done
 
 if ! cd "$dir"; then
-  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"Unable to cd to '$dir'\"}"
+  printf '{"status":"error","dir":"%s","error":"%s"}' "$dir" "can't cd to $dir" | logger -p user.err -t "$TAG"
   exit 1
 fi
 
 if ! out=$( (git fetch "$remote") 2>&1 ); then
-  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$out\"}"
+  printf '{"status":"error","dir":"%s","error":"%s"}' "$dir" "$out" | logger -p user.err -t "$TAG"
   exit 1
 fi
 
 if ! out=$( (git verify-commit "$remote/$branch") 2>&1 ); then
-  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"sha\":\"$(git rev-parse --short "$remote/$branch")\",\"error\":\"$remote/$branch does not have a valid signature\"}"
+  printf '{"status":"error","dir":"%s","sha":"%s","error":"%s"}' "$dir" "$(git rev-parse --short "$remote/$branch")" "$remote/$branch does not have a valid signature" | logger -p user.err -t "$TAG"
   exit 1
 fi
 
 if ! out=$( (git checkout "$branch" && git reset --hard "$remote/$branch") 2>&1 ); then
-  logger -p user.err -t "$TAG" "{\"status\":\"error\",\"dir\":\"$dir\",\"error\":\"$out\"}"
+  printf '{"status":"error","dir":"%s","sha":"%s","error":"%s"}' "$dir" "$(git rev-parse --short "$remote/$branch")" "$out" | logger -p user.err -t "$TAG"
   exit 1
 else
-  logger -p user.info -t "$TAG" "{\"status\":\"success\",\"dir\":\"$dir\",\"sha\":\"$(git rev-parse --short HEAD)\"}"
+  printf '{"status":"success","dir":"%s","sha":"%s"}' "$dir" "$(git rev-parse --short HEAD)" | logger -p user.info -t "$TAG"
 fi
